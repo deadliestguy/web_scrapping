@@ -5,6 +5,9 @@ from bs4 import BeautifulSoup as bs
 from urllib.request import urlopen as uReq
 import logging
 logging.basicConfig(filename="scrapper.log" , level=logging.INFO)
+import pymongo 
+from pymongo.mongo_client import MongoClient
+
 
 app = Flask(__name__)
 
@@ -72,11 +75,24 @@ def index():
                           "Comment": custComment}
                 reviews.append(mydict)
             logging.info("log my final result {}".format(reviews))
+
+            # connect with mongo db 
+            uri = "mongodb+srv://subhamlai:subham3204@cluster0.0f0ltjo.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
+            # Create a new client and connect to the server
+            client = MongoClient(uri)
+            # create a db 
+            db = client["review_scrap"]
+            # collection 
+            coll = db["review_scrap_coll"]
+
+            # coll er moddhe push korbo 
+            coll.insert_many(reviews)
+
+
             return render_template('result.html', reviews=reviews[0:(len(reviews)-1)])
         except Exception as e:
             logging.info(e)
             return 'something is wrong'
-    # return render_template('results.html')
 
     else:
         return render_template('index.html')
